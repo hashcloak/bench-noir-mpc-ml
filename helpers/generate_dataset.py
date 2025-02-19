@@ -6,38 +6,53 @@ import os
 
 SCALE = 2**16
 
+
 def quantize_row(features):
     """Quantize the feature row using SCALE."""
     return [round(feature * SCALE) for feature in features]
+
 
 def load_dataset(dataset_name):
     """Load the specified dataset."""
     if dataset_name == "iris":
         return datasets.load_iris()
     elif dataset_name == "wine":
-        return datasets.load_wine()
+        # The dataset Wine should be scaled.
+        dataset = datasets.load_wine()
+        scaler = preprocessing.MinMaxScaler()
+        scaled_dataset = scaler.fit_transform(dataset.data)
+        dataset.data = scaled_dataset
+        return dataset
     elif dataset_name == "digits":
         return datasets.load_digits()
     elif dataset_name == "diabetes":
         return datasets.load_diabetes()
     else:
-        raise ValueError(f"Dataset '{dataset_name}' is not supported. Available options: "
-                         f"iris, wine, digits, diabetes.")
+        raise ValueError(
+            f"Dataset '{dataset_name}' is not supported. Available options: "
+            f"iris, wine, digits, diabetes."
+        )
+
 
 if __name__ == "__main__":
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Generate dataset with dynamic sample size.")
-    parser.add_argument(
-        "--dataset", type=str, default="iris",
-        help="Dataset to load (default: 'iris')"
+    parser = argparse.ArgumentParser(
+        description="Generate dataset with dynamic sample size."
     )
     parser.add_argument(
-        "--samples-train", type=int, default=30,
-        help="Number of training samples (default: 30)"
+        "--dataset", type=str, default="iris", help="Dataset to load (default: 'iris')"
     )
     parser.add_argument(
-        "--samples-test", type=int, default=20,
-        help="Number of test samples (default: 20)"
+        "--samples-train",
+        type=int,
+        default=30,
+        help="Number of training samples (default: 30)",
+    )
+    parser.add_argument(
+        "--samples-test",
+        type=int,
+        default=20,
+        help="Number of test samples (default: 20)",
     )
     args = parser.parse_args()
 
@@ -51,7 +66,7 @@ if __name__ == "__main__":
     # Load the specified dataset
     dataset = load_dataset(DATASET_NAME)
 
-    if hasattr(dataset, 'frame') and dataset.frame is not None:
+    if hasattr(dataset, "frame") and dataset.frame is not None:
         data = dataset.frame
     else:
         data = pd.DataFrame(data=dataset.data, columns=dataset.feature_names)
@@ -65,7 +80,7 @@ if __name__ == "__main__":
         dataset_sample.iloc[:, :-1],
         dataset_sample["target"],
         train_size=SAMPLES_TRAIN,
-        random_state=1
+        random_state=1,
     )
 
     # Assemble test dataset and save it to a CSV file
@@ -83,7 +98,7 @@ if __name__ == "__main__":
     label_df = pd.DataFrame(
         label_binarizer_output,
         columns=[f"label_{cls}" for cls in label_binarizer.classes_],
-        index=train_df.index
+        index=train_df.index,
     )
 
     # Merge binarized labels with train dataset
@@ -98,10 +113,7 @@ if __name__ == "__main__":
     for _, row in train_df_binarized.iterrows():
         quantized_features = quantize_row(row[data.columns[:-1]])
         labels = {label: int(row[label]) for label in label_columns}
-        noir_data.append({
-            "features": quantized_features,
-            **labels
-        })
+        noir_data.append({"features": quantized_features, **labels})
 
     # Save dataset as JSON for Noir
     with open("./datasets/train_data.json", "w") as f:
@@ -121,11 +133,10 @@ if __name__ == "__main__":
         "features": num_features,
         "classes": num_classes,
         "samples_train": SAMPLES_TRAIN,
-        "samples_test": SAMPLES_TEST
+        "samples_test": SAMPLES_TEST,
     }
 
     with open("./datasets/metadata.json", "w") as f:
         json.dump(metadata, f, indent=4)
 
-    print(f"Metadata saved to ./datasets/metadata.json")
-
+    print("Metadata saved to ./datasets/metadata.json")

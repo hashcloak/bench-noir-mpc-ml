@@ -2,7 +2,7 @@
 
 # Files and directories to be removed
 FILES=("noir_output.txt" "quantized.txt")
-DIRECTORIES=("noir_project/target" "datasets")
+DIRECTORIES=("noir_project/target" "datasets" "output")
 
 # Remove specified files
 echo "Removing files..."

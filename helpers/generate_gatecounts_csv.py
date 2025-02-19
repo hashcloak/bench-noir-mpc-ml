@@ -6,7 +6,9 @@ import argparse
 input_file = "output/benchmarks.txt"
 
 # Parse arguments for output file
-parser = argparse.ArgumentParser(description="Parse benchmark results and save to a CSV file.")
+parser = argparse.ArgumentParser(
+    description="Parse benchmark results and save to a CSV file."
+)
 parser.add_argument("--output", required=True, help="Path to the output CSV file")
 args = parser.parse_args()
 output_file = args.output
@@ -15,7 +17,7 @@ output_file = args.output
 output_dir = os.path.dirname(output_file)
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-    
+
 # Initialize storage for parsed data
 results = []
 
@@ -42,12 +44,16 @@ while i < len(lines):
 
             # Extract numerical values directly
             if "acir_opcodes" in acir_opcodes_line:
-                entry["acir_opcodes"] = acir_opcodes_line.split(":")[1].strip().strip(",")
+                entry["acir_opcodes"] = (
+                    acir_opcodes_line.split(":")[1].strip().strip(",")
+                )
             else:
                 entry["acir_opcodes"] = "N/A"
 
             if "circuit_size" in circuit_size_line:
-                entry["circuit_size"] = circuit_size_line.split(":")[1].strip().strip(",")
+                entry["circuit_size"] = (
+                    circuit_size_line.split(":")[1].strip().strip(",")
+                )
             else:
                 entry["circuit_size"] = "N/A"
         except IndexError:
@@ -60,12 +66,22 @@ while i < len(lines):
 
         # Move to the next entry (skip processed lines)
         i += 4
+    if line.startswith("real"):
+        parts = line.split("\t")
+        entry["proving_time"] = parts[1].replace(",", ".")
+        i += 1
     else:
         i += 1  # Move to the next line if not `epochs=`
 
 # Write the results to a CSV file
 with open(output_file, "w", newline="") as csvfile:
-    fieldnames = ["epochs", "samples_train", "acir_opcodes", "circuit_size"]
+    fieldnames = [
+        "epochs",
+        "samples_train",
+        "acir_opcodes",
+        "circuit_size",
+        "proving_time",
+    ]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
     # Write the header and rows

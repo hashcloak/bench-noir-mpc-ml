@@ -10,12 +10,19 @@ Note that there are conversions happening of the data in between as the original
 
 ## Prerequisites
 
-The execution of the scripts requires `nargo` version `1.0.0-beta.0` and `bb` version `0.63.0`. To install both CLI applications, you can execute the following commands in the terminal:
+The execution of the scripts requires `nargo` version `1.0.0-beta.0` and `bb` version `0.63.0`. Also, it requires `co-noir` which can be installed following the [repository](https://github.com/TaceoLabs/co-snarks). To install both CLI applications, you can execute the following commands in the terminal:
 
 ```bash
-$ noirup --version 1.0.0-beta.0
-$ bbup -v 0.63.0
+$ noirup -C b7ace682af1ab8a43308457302f08b151af342db
+$ bbup 
 ```
+
+Other requirements are:
+
+- Python 3.
+- Install the requirements in `requirements.txt` using `pip`.
+- jq >= 1.7.1
+
 
 ## How to run
 

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Default values
-EPOCHS_LIST=(5 10 15)
+EPOCHS_LIST=(1)
 SAMPLES_TRAIN_LIST=(10 20 30)
 LEARNING_RATE=0.1
-DATASET_NAME="iris"
+DATASET_NAME="wine"
 PROJECT_DIR="./noir_project"
 TARGET_DIR="$PROJECT_DIR/target"
 OUT_DIR="output"
@@ -77,6 +77,7 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
         fi
 
         pushd "$PROJECT_DIR" > /dev/null || (echo "pushd failed" && exit 1)
+        nargo compile
         nargo execute
         if [ $? -ne 0 ]; then
             echo "Error: Failed to compile the Noir project for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
@@ -92,19 +93,20 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
             continue
         fi
 
-        # Step 6: Get gatecount for current params
-        echo "Getting gatecount..."
+        # Step 6: Get gatecount and proving time for current params
+        echo "Getting gatecount and proving time..."
         {
             echo "epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN" 
             bb gates -b "$TARGET_DIR/noir_project.json"
         } >> "$OUTPUT_BENCH"
+        { time bb gates -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof" 2> /dev/null ; } 2>> "$OUTPUT_BENCH"
         echo "===" >> "$OUTPUT_BENCH"
         if [ $? -ne 0 ]; then
-            echo "Error: Failed to get gatecount for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
+            echo "Error: Failed to get gatecount and proving time for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
             continue
         fi
 
-        echo "Gatecount completed for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
+        echo "Gatecount and proving time completed for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
     done
 done
 

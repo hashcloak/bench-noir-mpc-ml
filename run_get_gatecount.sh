@@ -102,4 +102,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Gatecount finished."
+# Step 7: Get proving time using Barretenberg
+echo "Get proving time..."
+{ time bb gates -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof" 2> /dev/null ; } 2>> "$OUTPUT_BENCH"
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to get proving time."
+    exit 1
+fi
+
+echo "Gatecount and proving time finished."
