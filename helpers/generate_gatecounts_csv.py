@@ -68,7 +68,7 @@ while i < len(lines):
         i += 4
     if line.startswith("real"):
         parts = line.split("\t")
-        entry["proving_time"] = parts[1].replace(",", ".")
+        entry["proving_time"] = parts[1]
         i += 1
     else:
         i += 1  # Move to the next line if not `epochs=`

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default values
-EPOCHS_LIST=(1)
+EPOCHS_LIST=(2)
 SAMPLES_TRAIN_LIST=(10 20 30)
 LEARNING_RATE=0.1
 DATASET_NAME="wine"
@@ -99,7 +99,7 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
             echo "epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN" 
             bb gates -b "$TARGET_DIR/noir_project.json"
         } >> "$OUTPUT_BENCH"
-        { time bb gates -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof" 2> /dev/null ; } 2>> "$OUTPUT_BENCH"
+        { time bb prove -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof" 2> /dev/null ; } 2>> "$OUTPUT_BENCH"
         echo "===" >> "$OUTPUT_BENCH"
         if [ $? -ne 0 ]; then
             echo "Error: Failed to get gatecount and proving time for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
